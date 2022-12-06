@@ -21,16 +21,32 @@ public class peerProcess {
 		
 		int peerID = Integer.valueOf(args[0]);
 		Map<Integer, peer> peersInfo = null;
+		Map<String, String> peersCommon = null;
 		peer newPeer = null;
+		
 		// eventually setup any initial vars we'll need, not sure atm
 		// what else may be needed
 		try {
 			peersInfo = readPeerConfig();
+			peersCommon = readCommonConfig();
 			//debugPeersInfo((HashMap<Integer, peer>) peersInfo);
 			//System.out.println(peerID);
 			newPeer = peersInfo.get(peerID);
 			//System.out.println(newPeer.toString());
-			newPeer.setPeerContactInfo(peersInfo);
+			newPeer.setPeersInfo(peersInfo);
+			
+			newPeer.setFilename(peersCommon.get("FileName"));
+			newPeer.setFileSize(Integer.valueOf(peersCommon.get("FileSize")));
+			newPeer.setNumberOfPreferredNeighbors(Integer.valueOf(peersCommon.get("NumberOfPreferredNeighbors")));
+			newPeer.setOptimisticUnchokingInterval(Integer.valueOf(peersCommon.get("OptimisticUnchokingInterval")));
+			newPeer.setPieceSize(Integer.valueOf(peersCommon.get("PieceSize")));
+			newPeer.setUnchokingInterval(Integer.valueOf(peersCommon.get("UnchokingInterval")));
+			
+			//setBitfield should only becalue if the following properites have been set
+			// piece size
+			// file size
+			// hasFile
+			newPeer.setBitfield();
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -64,8 +80,8 @@ public class peerProcess {
 		}
 		//** hardcoded test **//
 		
-		client cl = new client(peersInfo.get(1002), peersInfo.get(1001));
-		cl.connect();
+		// client cl = new client(peersInfo.get(1002), peersInfo.get(1001));
+		// cl.connect();
 		
 		//client cl2 = new client(peersInfo.get(1001), peersInfo.get(1002));
 		//cl2.connect();
@@ -104,6 +120,33 @@ public class peerProcess {
 		//debugPeersInfo(peersInfo);
 		return peersInfo;
 	}
+	
+	public static HashMap<String, String> readCommonConfig() throws IOException {
+		HashMap<String, String> commonConfig = new HashMap<String, String>();
+		
+		try {
+			File peerCFG = new File("C:\\Users\\zachk\\network\\torent\\Common.cfg");
+			//System.out.println("Working Directory = " + System.getProperty("user.dir"));
+			Scanner scrn = new Scanner(peerCFG);
+			
+			while(scrn.hasNextLine()) {
+				String line = scrn.nextLine(); 
+				String[] vars = line.split(" ");
+				
+				commonConfig.put(vars[0], vars[1]);
+			}
+			scrn.close();
+		}
+		catch(Exception e) {
+			System.out.println("Error reading common config");
+		}
+		
+		
+		return commonConfig;
+	}
+	
+	
+	
 	
 	public static void debugPeersInfo(HashMap<Integer, peer> peersInfo) {
 		System.out.println(peersInfo.toString());

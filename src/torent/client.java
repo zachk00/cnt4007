@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import torent.messages.handler;
-import torent.messages.message;
+import torent.messages.Message;
 import torent.peer.peer;
 
 public class client {
@@ -52,14 +52,14 @@ public class client {
 		
 		System.out.println("Spinning up client");
 		
-		/*handler hdr = new handler(out, in, this.currPeer, socket);
+		handler hdr = new handler(out, in, this.currPeer, socket);
 		
 		Thread handlerThread = new Thread(hdr);
 		handlerThread.start();
 		
-		*/
 		
-		currPeer.transmit(out,message.handshake(receiverPeer.getPeerID()));
+		
+		//currPeer.transmit(out,message.handshake(receiverPeer.getPeerID()));
 		
 		
 		

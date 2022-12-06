@@ -26,7 +26,6 @@ public class server implements Runnable{
 		// TODO Auto-generated method stub
 		ServerSocket listeningSocket = null;
 		Socket socket;
-		System.out.println("in srv");
 		
 		try {
 			System.out.println("listen on: "  + currPeer.getPort());
