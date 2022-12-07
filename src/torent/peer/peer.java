@@ -135,7 +135,7 @@ public class peer {
 		this.hasFile = hasFile;
 		this.interestedPeers = new ArrayList<Integer>();
 		this.creator = new Message();
-		this.log  = new pLogger(String.valueOf(this.peerID));
+		this.setLog(new pLogger(String.valueOf(this.peerID)));
 		this.contact = new HashMap<Integer, ObjectOutputStream>();
 		this.peersInterestingPieces = new HashMap<Integer, BitSet>();
 		
@@ -376,7 +376,9 @@ public class peer {
 		// TODO
 	}
 	
-	
+	public boolean isChocked(int peerID) {
+		return this.chockedPeers.contains(peerID);
+	}
 	
 	// reference note: port & host should be inside of the msg array
 	public void transmit(ObjectOutputStream stream, byte[] msg) throws IOException {
@@ -418,6 +420,20 @@ public class peer {
 	@Override
 	public String toString() {
 		return "peer [peerID=" + peerID + ", port=" + port + ", hostname=" + hostname + ", hasFile=" + hasFile + "]";
+	}
+
+
+
+
+	public pLogger getLog() {
+		return log;
+	}
+
+
+
+
+	public void setLog(pLogger log) {
+		this.log = log;
 	}
 	
 	
