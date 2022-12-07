@@ -132,7 +132,7 @@ public class peerProcess {
 			while(scrn.hasNextLine()) {
 				String line = scrn.nextLine(); 
 				String[] vars = line.split(" ");
-				peer newPeer = new peer(Integer.valueOf(vars[0]), Integer.valueOf(vars[2]), vars[1], Integer.valueOf(vars[3]));
+				peer newPeer = new peer(Integer.valueOf(vars[0]), Integer.valueOf(vars[2]), vars[1], Integer.valueOf(vars[3]), readCommonConfig());
 				//System.out.println(newPeer.toString());
 				peersInfo.put(newPeer.getPeerID(), newPeer);
 			}

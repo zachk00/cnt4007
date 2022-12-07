@@ -1,5 +1,6 @@
 package torent.peer;
 
+import java.io.*;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -43,6 +44,8 @@ public class peer {
 	String filename;
 	int fileSize;
 	int pieceSize;
+	String FileLocation;
+	String DirectoryLoc;
 
 	//derived attributes
 	
@@ -56,6 +59,7 @@ public class peer {
 	
 	HashMap<Integer, ObjectOutputStream> contact;
 	Map<Integer, peer> peersInfo;
+	Map<String, String> peersCommon;
 	HashMap<Integer, BitSet> peersInterestingPieces;
 	
 	
@@ -128,7 +132,7 @@ public class peer {
 
 
 
-	public peer(int peerID, int port, String hostname, int hasFile) {
+	public peer(int peerID, int port, String hostname, int hasFile, Map<String, String> cInfo) {
 		this.peerID = peerID;
 		this.port = port;
 		this.hostname = hostname;
@@ -138,7 +142,7 @@ public class peer {
 		this.setLog(new pLogger(String.valueOf(this.peerID)));
 		this.contact = new HashMap<Integer, ObjectOutputStream>();
 		this.peersInterestingPieces = new HashMap<Integer, BitSet>();
-		
+		this.peersCommon = cInfo;
 		this.unchockedPeers = new ArrayList<Integer>();
 		this.chockedPeers = new ArrayList<Integer>(); 
 		
@@ -407,8 +411,18 @@ public class peer {
 	}
 	
 	public void writeFile() {
-		
-		//TODO
+		int PieceSize = Integer.parseInt(peersCommon.get("PieceSize"));
+		int fileSize = Integer.parseInt(peersCommon.get("FileSize"));
+		byte[] fBytes = new byte[fileSize];
+		for (int i = 0; i < fileSize; i++)
+			fBytes[i] = file[(int) Math.floor((double) i / PieceSize)][i % PieceSize];
+		try (FileOutputStream byteToF = new FileOutputStream(filename + "\\" + peerID + "\\thefile")) {
+			byteToF.write(fBytes);
+			byteToF.close();
+		} catch (Exception e) {
+			System.out.println("Unable to write bytes to File");
+		}
+		// TODO
 		// all the data for the file is stored in the byte[][] file
 		// save it to a file in the appropiate folder
 		// you can assume the folder already exists
