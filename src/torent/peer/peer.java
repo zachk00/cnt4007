@@ -411,11 +411,9 @@ public class peer {
 	}
 	
 	public void writeFile() {
-		int PieceSize = Integer.parseInt(peersCommon.get("PieceSize"));
-		int fileSize = Integer.parseInt(peersCommon.get("FileSize"));
 		byte[] fBytes = new byte[fileSize];
 		for (int i = 0; i < fileSize; i++)
-			fBytes[i] = file[(int) Math.floor((double) i / PieceSize)][i % PieceSize];
+			fBytes[i] = file[(int) Math.floor((double) i / pieceSize)][i % pieceSize];
 		try (FileOutputStream byteToF = new FileOutputStream(filename + "\\" + peerID + "\\thefile")) {
 			byteToF.write(fBytes);
 			byteToF.close();
