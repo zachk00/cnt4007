@@ -50,7 +50,7 @@ public class peerProcess {
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.out.print("Peers not confiugred");
+			System.out.print("Peer not confiugred");
 			e.printStackTrace();
 			System.exit(0);
 		}
@@ -80,12 +80,40 @@ public class peerProcess {
 		}
 		//** hardcoded test **//
 		
-		// client cl = new client(peersInfo.get(1002), peersInfo.get(1001));
-		// cl.connect();
 		
-		//client cl2 = new client(peersInfo.get(1001), peersInfo.get(1002));
-		//cl2.connect();
-		//--------------------------------//
+		try {
+			peersInfo = readPeerConfig();
+			peersCommon = readCommonConfig();
+			//debugPeersInfo((HashMap<Integer, peer>) peersInfo);
+			//System.out.println(peerID);
+			newPeer = peersInfo.get(1002);
+			//System.out.println(newPeer.toString());
+			newPeer.setPeersInfo(peersInfo);
+			
+			newPeer.setFilename(peersCommon.get("FileName"));
+			newPeer.setFileSize(Integer.valueOf(peersCommon.get("FileSize")));
+			newPeer.setNumberOfPreferredNeighbors(Integer.valueOf(peersCommon.get("NumberOfPreferredNeighbors")));
+			newPeer.setOptimisticUnchokingInterval(Integer.valueOf(peersCommon.get("OptimisticUnchokingInterval")));
+			newPeer.setPieceSize(Integer.valueOf(peersCommon.get("PieceSize")));
+			newPeer.setUnchokingInterval(Integer.valueOf(peersCommon.get("UnchokingInterval")));
+			
+			//setBitfield should only becalue if the following properites have been set
+			// piece size
+			// file size
+			// hasFile
+			newPeer.setBitfield();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.print("Peer not confiugred");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		
+		 client cl = new client(peersInfo.get(1002), peersInfo.get(1001));
+		 cl.connect();
+
 		// repeat previous steps for the client
 		
 		
