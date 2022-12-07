@@ -44,8 +44,6 @@ public class peer {
 	String filename;
 	int fileSize;
 	int pieceSize;
-	String FileLocation;
-	String DirectoryLoc;
 
 	//derived attributes
 	
@@ -418,7 +416,6 @@ public class peer {
 		} catch (Exception e) {
 			System.out.println("Unable to write bytes to File");
 		}
-		// TODO
 		// all the data for the file is stored in the byte[][] file
 		// save it to a file in the appropiate folder
 		// you can assume the folder already exists
