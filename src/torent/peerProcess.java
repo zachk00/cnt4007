@@ -2,10 +2,7 @@ package torent;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -46,7 +43,14 @@ public class peerProcess {
 			// piece size
 			// file size
 			// hasFile
-			newPeer.setBitfield();
+			newPeer.initNumberOfPieces();
+			newPeer.initBitfield();
+			newPeer.initPiecesDownloaded();
+			newPeer.initFile();
+			
+			if (newPeer.hasFile()) {
+				newPeer.readFile();	
+			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -82,26 +86,34 @@ public class peerProcess {
 		
 		
 		try {
+			peer newPeers = null;
 			peersInfo = readPeerConfig();
 			peersCommon = readCommonConfig();
 			//debugPeersInfo((HashMap<Integer, peer>) peersInfo);
 			//System.out.println(peerID);
-			newPeer = peersInfo.get(1002);
+			newPeers = peersInfo.get(1002);
 			//System.out.println(newPeer.toString());
-			newPeer.setPeersInfo(peersInfo);
+			newPeers.setPeersInfo(peersInfo);
 			
-			newPeer.setFilename(peersCommon.get("FileName"));
-			newPeer.setFileSize(Integer.valueOf(peersCommon.get("FileSize")));
-			newPeer.setNumberOfPreferredNeighbors(Integer.valueOf(peersCommon.get("NumberOfPreferredNeighbors")));
-			newPeer.setOptimisticUnchokingInterval(Integer.valueOf(peersCommon.get("OptimisticUnchokingInterval")));
-			newPeer.setPieceSize(Integer.valueOf(peersCommon.get("PieceSize")));
-			newPeer.setUnchokingInterval(Integer.valueOf(peersCommon.get("UnchokingInterval")));
+			newPeers.setFilename(peersCommon.get("FileName"));
+			newPeers.setFileSize(Integer.valueOf(peersCommon.get("FileSize")));
+			newPeers.setNumberOfPreferredNeighbors(Integer.valueOf(peersCommon.get("NumberOfPreferredNeighbors")));
+			newPeers.setOptimisticUnchokingInterval(Integer.valueOf(peersCommon.get("OptimisticUnchokingInterval")));
+			newPeers.setPieceSize(Integer.valueOf(peersCommon.get("PieceSize")));
+			newPeers.setUnchokingInterval(Integer.valueOf(peersCommon.get("UnchokingInterval")));
 			
 			//setBitfield should only becalue if the following properites have been set
 			// piece size
 			// file size
 			// hasFile
-			newPeer.setBitfield();
+			newPeers.initNumberOfPieces();
+			newPeers.initBitfield();
+			newPeers.initPiecesDownloaded();
+			newPeers.initFile();
+			
+			if (newPeer.hasFile()) {
+				newPeer.readFile();	
+			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
