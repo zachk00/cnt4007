@@ -46,7 +46,7 @@ public class peer {
 
 	//derived attributes
 	
-	int numberOfPieces;
+	public int numberOfPieces;
 	int piecesDownloaded;
 	
 	byte[][] file;
@@ -311,9 +311,17 @@ public class peer {
 	
 	public BitSet findInterestingPieces(BitSet fromBitfield) {
 		
-		// TODO
 		// 
 		// compare this peer's bitfield with given bitset
+		BitSet comparison = (BitSet) fromBitfield.clone();
+		BitSet result = new BitSet(this.numberOfPieces);
+		
+		for (int i = 0; i < this.numberOfPieces; i++) {
+			if (comparison.get(i) && !this.bitfield.get(i)) {
+				result.set(i);
+			}
+		}
+		
 		
 		// return bitset that has the interesting pieces demarkated as true
 		
@@ -322,14 +330,16 @@ public class peer {
 		// our bitfield needs the 2nd piece and the from peer has it so we return
 		// 0 1 0 0 0
 		
-		// this return statement is just so eclipse doesnt yell at me, you'll need to change this
-		return new BitSet();
+		return result;
 	}
 	
 	public int getRequestIndex(BitSet interestingPieces) {
 		int index = 0;
 		
 		//TODO
+		
+		
+		
 		//given bitset of interesting pieces
 		// randomly select one and return the index
 		
