@@ -59,7 +59,6 @@ public class peer {
 	
 	HashMap<Integer, ObjectOutputStream> contact;
 	Map<Integer, peer> peersInfo;
-	Map<String, String> peersCommon;
 	HashMap<Integer, BitSet> peersInterestingPieces;
 	
 	
@@ -132,7 +131,7 @@ public class peer {
 
 
 
-	public peer(int peerID, int port, String hostname, int hasFile, Map<String, String> cInfo) {
+	public peer(int peerID, int port, String hostname, int hasFile) {
 		this.peerID = peerID;
 		this.port = port;
 		this.hostname = hostname;
@@ -142,7 +141,6 @@ public class peer {
 		this.setLog(new pLogger(String.valueOf(this.peerID)));
 		this.contact = new HashMap<Integer, ObjectOutputStream>();
 		this.peersInterestingPieces = new HashMap<Integer, BitSet>();
-		this.peersCommon = cInfo;
 		this.unchockedPeers = new ArrayList<Integer>();
 		this.chockedPeers = new ArrayList<Integer>(); 
 		
