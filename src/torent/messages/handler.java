@@ -20,7 +20,6 @@ public class handler implements Runnable{
 	private Socket socket;
 	private volatile boolean running = true;
 	private Message creator;
-	private pLogger log;
 	private int otherPeerID;
 	
 	
@@ -30,7 +29,7 @@ public class handler implements Runnable{
 		this.in = in;
 		this.socket = sock;
 		this.creator = new Message();
-		this.log = new pLogger(String.valueOf(this.currPeer.getPeerID()));
+		
 	}
 	
 	
@@ -66,14 +65,13 @@ public class handler implements Runnable{
 				switch (type) {
 					case 0:
 						// choked by neighbor
-						
-						this.log.choked(String.valueOf(this.otherPeerID));
+						this.currPeer.getLog().choked(String.valueOf(this.otherPeerID));
 						break;
 					case 1:
 						// unchoke from neighbor
 						
 						
-						this.log.unchoked(String.valueOf(this.otherPeerID));
+						this.currPeer.getLog().unchoked(String.valueOf(this.otherPeerID));
 						
 						if(!this.currPeer.hasFile()) {
 							
@@ -90,13 +88,13 @@ public class handler implements Runnable{
 						// interested
 						
 						this.currPeer.addInterestedPeer(this.otherPeerID);
-						this.log.recInterested(String.valueOf(this.otherPeerID));
+						this.currPeer.getLog().recInterested(String.valueOf(this.otherPeerID));
 						
 						break;
 					case 3:
 						// not interested
 						this.currPeer.removeInterestedPeer(this.otherPeerID);
-						this.log.recNotInterested(String.valueOf(this.otherPeerID));
+						this.currPeer.getLog().recNotInterested(String.valueOf(this.otherPeerID));
 						break;
 					case 4:
 						// have
@@ -148,6 +146,23 @@ public class handler implements Runnable{
 						break;
 					case 6:
 						// request
+						
+						int pieceIndex;
+						
+						byte[] data = this.creator.getPayload(message);
+						pieceIndex = ByteBuffer.wrap(data).getInt();
+						
+						System.out.println("piece index " + pieceIndex);
+						
+						if (!this.currPeer.isChocked(this.otherPeerID)) {
+							byte[] piece = this.currPeer.getFile()[pieceIndex];
+							
+							messageParams params = new messageParams();
+							
+							params.setPieceField(piece);
+						}
+						
+						
 						break;
 					case 7:
 						// piece
@@ -173,7 +188,7 @@ public class handler implements Runnable{
 							this.otherPeerID = id;
 							this.currPeer.getContact().put(id, out);
 							
-							log.recTCP(String.valueOf(id));
+							this.currPeer.getLog().recTCP(String.valueOf(id));
 							
 							
 							
@@ -192,8 +207,7 @@ public class handler implements Runnable{
 							System.out.println("sending bitfield msg after handshake " + this.currPeer.getPeerID() + " " + this.otherPeerID + " " + id);
 							this.currPeer.transmit(out, response);
 							
-							
-							
+					
 						}
 						
 				}
