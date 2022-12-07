@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.BitSet;
 
 import torent.logger.pLogger;
 import torent.peer.peer;
@@ -102,6 +103,39 @@ public class handler implements Runnable{
 						break;
 					case 5:
 						// bitfield
+						System.out.println("got bifeild mesg");
+						byte[] payload = creator.getPayload(message);
+						
+						BitSet fromBitfield = BitSet.valueOf(payload);
+						
+						BitSet currPeerBitfield = (BitSet) this.currPeer.getBitfield().clone();
+						
+						// if the bitsets are the same, this peer is not interested
+						
+						if (currPeerBitfield.equals(fromBitfield)) {
+							
+							System.out.println("empty bitfield");
+							
+							messageParams msg = new messageParams();
+							
+							byte[] response = this.creator.createMessage(3, msg);
+							
+							this.currPeer.transmit(out, response);
+							System.out.println("sent not intr");
+							
+						}
+						else {
+							
+							// determine what pieces fromPeer has that we dont
+							BitSet interestingPieces = this.currPeer.findInterestingPieces(fromBitfield);
+							//store them & send not/interested msg
+							System.out.println(this.otherPeerID);
+							this.currPeer.setPeersInterestingPieces(this.otherPeerID, interestingPieces);
+							
+							
+						}
+						
+						
 						break;
 					case 6:
 						// request
@@ -122,24 +156,34 @@ public class handler implements Runnable{
 						if(handShakeString.equalsIgnoreCase(this.creator.handshakeMSG)) {
 							
 							
+							// extract the peerID of the other peer
+							// save in to this peer's contact map
+							byte[] otherPeer = new byte[4];
+							System.arraycopy(message, 28, otherPeer, 0, 4);
+							int id = ByteBuffer.wrap(otherPeer).getInt();
+							this.otherPeerID = id;
+							this.currPeer.getContact().put(id, out);
+							
+							log.recTCP(String.valueOf(id));
+							
+							
+							
+							
 							// respond with bitfield
 							// create proper param object 
 							// use message class to create byte array to send
 	
 							messageParams params = new messageParams();
+							
+							
+							
+							
 							params.setBitfield(this.currPeer.getBitfield());
 							byte[] response = creator.createMessage(5, params);
+							System.out.println("sending bitfield msg after handshake " + this.currPeer.getPeerID() + " " + this.otherPeerID + " " + id);
 							this.currPeer.transmit(out, response);
 							
-							// extract the peerID of the other peer
-							// save in to this peer's contact map
-							byte[] otherPeerID = new byte[4];
-							System.arraycopy(message, 28, otherPeerID, 0, 4);
-							int id = ByteBuffer.wrap(otherPeerID).getInt();
 							
-							this.currPeer.getContact().put(id, out);
-							
-							log.recTCP(String.valueOf(id));
 							
 						}
 						

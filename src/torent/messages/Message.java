@@ -72,7 +72,7 @@ public class Message {
 				// have message(4) request message(6)
 				messageLength = messageType.length;
 				
-				payload = (byte[]) params.getParam("pieceIndex");
+				payload = params.getPayload();
 				
 				messageLength = messageLength + payload.length;
 				
@@ -87,7 +87,7 @@ public class Message {
 				//bitfield message
 				messageLength = messageType.length;
 				
-				payload = (byte[]) params.getParam("bitfield");
+				payload = params.getBitfield().toByteArray();
 				
 				messageLength = messageLength + payload.length;
 				
@@ -97,13 +97,14 @@ public class Message {
 				message.write(length.array());
 				message.write(messageType);
 				message.write(payload);
+				break;
 			case 7:
 				//piece message
 				messageLength = messageType.length;
 				ByteBuffer temp;
 				
-				byte[] pieceField = (byte[]) params.getParam("bitfield");
-				int pieceIndex = (int) params.getParam("pieceIndex");
+				byte[] pieceField = params.getPieceField();
+				int pieceIndex = params.getPieceIndex();
 				
 				temp = ByteBuffer.allocate(4 + pieceField.length);
 				temp.putInt(pieceIndex);
@@ -119,6 +120,7 @@ public class Message {
 				message.write(length.array());
 				message.write(messageType);
 				message.write(payload);
+				break;
 			default:
 				System.out.println("INVALID MESSAGE TYPE");
 				throw new IllegalArgumentException("Message of type: " + String.valueOf(type) + " does not exist");
