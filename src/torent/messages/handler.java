@@ -9,7 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
-import torent.logger.pLogger;
+
 import torent.peer.peer;
 
 public class handler implements Runnable{
@@ -61,7 +61,8 @@ public class handler implements Runnable{
 				byte [] message = (byte[])in.readObject();
 				
 				int type = creator.getType(message);
-				
+				int pieceIndex;
+				byte[] piece;
 				switch (type) {
 					case 0:
 						// choked by neighbor
@@ -77,10 +78,19 @@ public class handler implements Runnable{
 							
 							// if peer receives unchoke msg
 							// peer should respond with request message
+							BitSet fromPieces = this.currPeer.getPeersInfo().get(this.otherPeerID).getBitfield();
+							BitSet interestingPieces = this.currPeer.findInterestingPieces(fromPieces);
+							int requestIndex  = this.currPeer.getRequestIndex(interestingPieces);
+							
+							messageParams params = new messageParams();
+							params.setPieceIndex(requestIndex);
+							
+							byte[] response = creator.createMessage(6, params);
+							
+							this.currPeer.transmit(out, response);
 							
 							
-							
-							
+
 						}
 						
 						break;
@@ -98,6 +108,36 @@ public class handler implements Runnable{
 						break;
 					case 4:
 						// have
+						byte[] temp = creator.getPayload(message);
+						pieceIndex = ByteBuffer.wrap(temp).getInt();
+						
+						this.currPeer.getLog().recHave(String.valueOf(this.otherPeerID), String.valueOf(pieceIndex));
+						
+						this.currPeer.updateBitfield(this.otherPeerID, pieceIndex);
+						
+						
+						// take the new updated bitset
+						// compare it to this peer's bitset
+						// place the result of that comparison in a new bitset
+						// if that resulting bitset has any 'set' bits that means we found at least 1 interesting piece
+						
+						BitSet newFromBitField = this.currPeer.getPeersInfo().get(this.otherPeerID).getBitfield();
+						BitSet newBitFieldInterestingPieces = this.currPeer.findInterestingPieces(newFromBitField);
+						
+						
+						// if the other peer has stuff we want now, send interested
+						// otherwise say we arent interested
+						
+						messageParams params  = new messageParams();
+						
+						if (newBitFieldInterestingPieces.nextSetBit(0) != -1) {
+							this.currPeer.transmit(out, creator.createMessage(2, params));
+						}
+						else {
+							this.currPeer.transmit(out, creator.createMessage(3, params));
+						}
+
+						
 						break;
 					case 5:
 						// bitfield
@@ -123,11 +163,8 @@ public class handler implements Runnable{
 							
 						}
 						else {
-							
-								
-							
+						
 							System.out.println("differing bitfields " + this.otherPeerID + " " + this.currPeer.getPeerID());
-							
 										
 							// determine what pieces fromPeer has that we dont
 							BitSet interestingPieces = this.currPeer.findInterestingPieces(fromBitfield);
@@ -147,35 +184,93 @@ public class handler implements Runnable{
 					case 6:
 						// request
 						
-						int pieceIndex;
-						
 						byte[] data = this.creator.getPayload(message);
 						pieceIndex = ByteBuffer.wrap(data).getInt();
 						
 						System.out.println("piece index " + pieceIndex);
 						
 						if (!this.currPeer.isChocked(this.otherPeerID)) {
-							byte[] piece = this.currPeer.getFile()[pieceIndex];
+							
+							// if the requesting peer isnt choked send them their requested piece
+							piece = this.currPeer.getFile()[pieceIndex];
 							
 							messageParams params = new messageParams();
 							
 							params.setPieceField(piece);
+							params.setPieceIndex(pieceIndex);
+							
+							byte[] response = this.creator.createMessage(7, params);
+							
+							this.currPeer.transmit(out, response);
+							
 						}
 						
 						
 						break;
 					case 7:
-						// piece
+						// get piece and piece index
+						// save to file[][]
+						int pieceStart = message.length - 9;
+						
+						
+						byte[] tempIndex = new byte[4];
+						System.arraycopy(message, 5, tempIndex, 0, 4);
+						pieceIndex = ByteBuffer.wrap(tempIndex).getInt();						
+						
+						
+						piece = new byte[pieceStart];
+						
+						System.arraycopy(message, pieceStart, piece, 0, piece.length);
+						
+						
+						this.currPeer.getFile()[pieceIndex] = piece;
+						this.currPeer.getLog().pieceDownloaded(String.valueOf(this.otherPeerID),String.valueOf(pieceIndex), String.valueOf(this.currPeer.numberOfPieces));
+						// send have msg to all other peers
+						// update how many pieces we've received from them
+						this.currPeer.getPeersInfo().get(this.otherPeerID).incrementPiecesReceived();
+						this.currPeer.incrementPiecesDownload();
+						for (int id : this.currPeer.getContact().keySet()) {
+							if (id != this.currPeer.getPeerID()) {
+								messageParams params = new messageParams();
+								params.setPieceIndex(pieceIndex);
+								
+								byte[] response = creator.createMessage(4, params);
+								
+								this.currPeer.transmit(this.currPeer.getContact().get(id), response);
+							}
+						}
+						
+						// if we have all the file
+						// else send another request
+						
+						if (this.currPeer.hasFile()) {
+							this.currPeer.writeFile();
+							this.currPeer.getLog().fileDownloaded();
+						}
+						else {
+							BitSet fromPieces = this.currPeer.getPeersInfo().get(this.otherPeerID).getBitfield();
+							BitSet interestingPieces = this.currPeer.findInterestingPieces(fromPieces);
+							int requestIndex  = this.currPeer.getRequestIndex(interestingPieces);
+							
+							messageParams params = new messageParams();
+							params.setPieceIndex(requestIndex);
+							
+							byte[] response = creator.createMessage(6, params);
+							
+							this.currPeer.transmit(out, response);
+						}
+						
+						
 						
 						break;
 					default:
 						// handshake
 						ByteBuffer handshake = ByteBuffer.wrap(message);
-						byte[] temp = new byte[18];
+						byte[] temps = new byte[18];
 						
-						handshake.get(temp, 0, 18);
+						handshake.get(temps, 0, 18);
 						
-						String handShakeString = new String(temp, StandardCharsets.UTF_8);
+						String handShakeString = new String(temps, StandardCharsets.UTF_8);
 						
 						if(handShakeString.equalsIgnoreCase(this.creator.handshakeMSG)) {
 							
