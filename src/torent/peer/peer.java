@@ -8,6 +8,8 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import torent.Common;
 import torent.client;
@@ -207,6 +209,10 @@ public class peer {
 		}
 	}
 	
+	public List<Integer> getInterestedPeers() {
+		return this.interestedPeers;
+	}
+	
 	public boolean hasFile() {
 		return this.hasFile == 1;
 	}
@@ -347,12 +353,32 @@ public class peer {
 		return index;
 	}
 	
+	public List<Integer> getChokedPeers() {
+		return this.chockedPeers;
+	}
+	
+	public List<Integer> getUnchokedPeers() {
+		return this.chockedPeers;
+	}
+	
+	public int getPiecesDownloaded() {
+		return this.piecesDownloaded;
+	}
+	
+	public void setPiecesDownloaded(int num) {
+		this.piecesDownloaded = num;
+	}
+	
 	// feel free to change method signature as needed/ add helpers methods
 	//will call this from peerProcess for each peer to start the process
 	// it calls prefferd peers every X interval based on config
 	//probably need a thread
 	public void runPreferredPeers() {
-		// TODO
+		// Run this function upon creation of a peer
+		// Create a Timer Schedule to run preferredPeers calculation 
+		TimerTask preferredPeers = new PreferredPeers(this);
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(preferredPeers, 0, this.getUnchokingInterval()*1000);
 	}
 	
 	// feel free to change method signature as needed/ add helpers methods
