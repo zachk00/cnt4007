@@ -114,7 +114,7 @@ public class handler implements Runnable{
 						
 						if (currPeerBitfield.equals(fromBitfield)) {
 							
-							System.out.println("empty bitfield");
+							System.out.println("equal bitfield");
 							
 							messageParams msg = new messageParams();
 							
@@ -126,11 +126,20 @@ public class handler implements Runnable{
 						}
 						else {
 							
+								
+							
+							System.out.println("differing bitfields " + this.otherPeerID + " " + this.currPeer.getPeerID());
+							
+										
 							// determine what pieces fromPeer has that we dont
 							BitSet interestingPieces = this.currPeer.findInterestingPieces(fromBitfield);
-							//store them & send not/interested msg
-							System.out.println(this.otherPeerID);
-							this.currPeer.setPeersInterestingPieces(this.otherPeerID, interestingPieces);
+							if (!interestingPieces.isEmpty()) {
+								System.out.println(interestingPieces.toString());
+								//store them & send not/interested msg
+								System.out.println(this.otherPeerID);
+								this.currPeer.setPeersInterestingPieces(this.otherPeerID, interestingPieces);
+							}
+							
 							
 							
 						}
