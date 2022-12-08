@@ -1,5 +1,6 @@
 package torent.peer;
 
+import java.io.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -74,7 +75,6 @@ public class peer {
 		this.setLog(new pLogger(String.valueOf(this.peerID)));
 		this.contact = new HashMap<Integer, ObjectOutputStream>();
 		this.peersInterestingPieces = new HashMap<Integer, BitSet>();
-		
 		this.unchockedPeers = new ArrayList<Integer>();
 		this.chockedPeers = new ArrayList<Integer>();
 		
@@ -192,7 +192,7 @@ public class peer {
 	public List<Integer> getInterestedPeers() {
 		return this.interestedPeers;
 	}
-	
+
 	public boolean hasFile() {
 		return this.hasFile == 1;
 	}
@@ -418,6 +418,53 @@ public class peer {
 		return index;
 	}
 	
+
+	public List<Integer> getChokedPeers() {
+		return this.chockedPeers;
+	}
+
+	public List<Integer> getUnchokedPeers() {
+		return this.chockedPeers;
+	}
+
+	public int getPiecesDownloaded() {
+		return this.piecesDownloaded;
+	}
+
+	public void setPiecesDownloaded(int num) {
+		this.piecesDownloaded = num;
+	}
+
+	// feel free to change method signature as needed/ add helpers methods
+	//will call this from peerProcess for each peer to start the process
+	// it calls prefferd peers every X interval based on config
+	//probably need a thread
+	public void runPreferredPeers() {
+		// TODO
+	}
+	
+	// feel free to change method signature as needed/ add helpers methods
+	// selected new preffered peers
+	public void preferredPeers() {
+		// TODO
+	}
+	
+	
+	// feel free to change method signature as needed/ add helpers methods
+	//will call this from peerProcess for each peer to start the process
+	// it calls optimisticUnchoke every X interval based on config
+	//probably need a thread
+	public void runOptimistic() {
+		TimerTask opUnchoke = new optimisticUnchoke(this);
+		Timer opUnchoketimer = new Timer();
+		opUnchoketimer.scheduleAtFixedRate(opUnchoke, 0, this.getOptimisticUnchokingInterval()*1000);
+	}
+	
+	// feel free to change method signature as needed/ add helpers methods
+	// select optimisticUnchoke neighbors
+	public void optimisticUnchoke() {
+		// TODO
+	}
 	
 	public boolean isChocked(int peerID) {
 		return this.chockedPeers.contains(peerID);
@@ -481,7 +528,16 @@ public class peer {
 	
 	
 	public void writeFile() {
-		
+		byte[] fBytes = new byte[fileSize];
+		for (int i = 0; i < fileSize; i++)
+			fBytes[i] = file[(int) Math.floor((double) i / pieceSize)][i % pieceSize];
+		try (FileOutputStream byteToF = new FileOutputStream(peerID + "\\" + filename)) {
+			byteToF.write(fBytes);
+			byteToF.close();
+		} catch (Exception e) {
+			System.out.println("Unable to write bytes to File");
+		}
+
 		// all the data for the file is stored in the byte[][] file
 		// save it to a file in the appropiate folder
 		// you can assume the folder already exists
