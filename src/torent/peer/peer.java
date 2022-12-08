@@ -189,6 +189,10 @@ public class peer {
 		}
 	}
 	
+	public List<Integer> getInterestedPeers() {
+		return this.interestedPeers;
+	}
+	
 	public boolean hasFile() {
 		return this.hasFile == 1;
 	}
@@ -413,7 +417,6 @@ public class peer {
 		
 		return index;
 	}
-	
 	
 	
 	public boolean isChocked(int peerID) {

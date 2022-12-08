@@ -141,7 +141,8 @@ public class peerProcess {
 	
 
 		try {
-			File peerCFG = new File("C:\\Users\\zachk\\network\\torent\\PeerInfo.cfg");
+//			File peerCFG = new File("C:\\Users\\zachk\\network\\torent\\PeerInfo.cfg");
+			File peerCFG = new File(System.getProperty("user.dir")+"/PeerInfo.cfg");
 			//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 			Scanner scrn = new Scanner(peerCFG);
 			//int peerID, int port, String hostname, int hasFile
@@ -169,7 +170,8 @@ public class peerProcess {
 		HashMap<String, String> commonConfig = new HashMap<String, String>();
 		
 		try {
-			File peerCFG = new File("C:\\Users\\zachk\\network\\torent\\Common.cfg");
+//			File peerCFG = new File("C:\\Users\\zachk\\network\\torent\\Common.cfg");
+			File peerCFG = new File(System.getProperty("user.dir")+"/Common.cfg");
 			//System.out.println("Working Directory = " + System.getProperty("user.dir"));
 			Scanner scrn = new Scanner(peerCFG);
 			
