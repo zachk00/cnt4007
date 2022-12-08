@@ -1,13 +1,20 @@
 package torent.peer;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Timer;
+import java.util.TimerTask;
 
 import torent.logger.pLogger;
 import torent.messages.Message;
@@ -73,8 +80,25 @@ public class peer {
 		
 
 	}
+	public List<Integer> getInterestedPeers() {
+		return this.interestedPeers;
+	}
 	
-	
+	public List<Integer> getChokedPeers() {
+		return this.chockedPeers;
+	}
+
+	public List<Integer> getUnchokedPeers() {
+		return this.chockedPeers;
+	}
+
+	public int getPiecesDownloaded() {
+		return this.piecesDownloaded;
+	}
+
+	public void setPiecesDownloaded(int num) {
+		this.piecesDownloaded = num;
+	}
 	
 	public int getPiecesRecieved() {
 		return piecesRecieved;
@@ -189,7 +213,9 @@ public class peer {
 	}
 	
 	public void initNumberOfPieces() {
-		this.numberOfPieces = this.fileSize / this.pieceSize;
+		double tempFile = this.fileSize;
+		double tempPiece = this.pieceSize;
+		this.numberOfPieces = (int) Math.ceil(tempFile / tempPiece);
 	}
 	
 	public void initBitfield() {
@@ -366,6 +392,13 @@ public class peer {
 		
 		return result;
 	}
+	public void runPreferredPeers() {
+		// Run this function upon creation of a peer
+		// Create a Timer Schedule to run preferredPeers calculation 
+		TimerTask preferredPeers = new PreferredPeers(this);
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(preferredPeers, 0, this.getUnchokingInterval()*1000);
+	}
 	
 	public int getRequestIndex(BitSet interestingPieces) {
 		int index = 0;
@@ -381,34 +414,7 @@ public class peer {
 		return index;
 	}
 	
-	// feel free to change method signature as needed/ add helpers methods
-	//will call this from peerProcess for each peer to start the process
-	// it calls prefferd peers every X interval based on config
-	//probably need a thread
-	public void runPreferredPeers() {
-		// TODO
-	}
 	
-	// feel free to change method signature as needed/ add helpers methods
-	// selected new preffered peers
-	public void preferredPeers() {
-		// TODO
-	}
-	
-	
-	// feel free to change method signature as needed/ add helpers methods
-	//will call this from peerProcess for each peer to start the process
-	// it calls poptimisticUnchoke every X interval based on config
-	//probably need a thread
-	public void runOptimistic() {
-		// TODO
-	}
-	
-	// feel free to change method signature as needed/ add helpers methods
-	// select optimisticUnchoke neighbors
-	public void optimisticUnchoke() {
-		// TODO
-	}
 	
 	public boolean isChocked(int peerID) {
 		return this.chockedPeers.contains(peerID);
@@ -441,18 +447,77 @@ public class peer {
 	}
 	
 	public void readFile() {
-	   // TODO
+
+		try {
+			Path path = Paths.get("C:\\Users\\zachk\\network\\torent\\src\\torent\\peer\\peer_1001\\theFile");
+			byte[] fileData = Files.readAllBytes(path);
+			int pieceToCopy = 0;
+			System.out.println(fileData.length);
+			System.out.println("pcs " + this.numberOfPieces);
+			for (int i = 0; i < fileData.length; i = i + this.pieceSize) {
+				byte[] piece = Arrays.copyOfRange(fileData, i, i + this.pieceSize);
+
+				this.file[pieceToCopy] = piece;
+				pieceToCopy++;
+			}
+			
+			
+		}
+		catch(Exception e){
+			System.out.print("ERROR READING FILE IN readFile()");
+			e.printStackTrace();
+		}
+		
+        
+        
+		
+		
+		
 	}
 	
 	
 	
 	public void writeFile() {
 		
-		//TODO
 		// all the data for the file is stored in the byte[][] file
 		// save it to a file in the appropiate folder
 		// you can assume the folder already exists
 		// we will have the folders created before we run anything
+		
+		FileOutputStream outputStream = null;
+        try {
+            
+            File fileLocation = new File("C:\\Users\\zachk\\network\\torent\\src\\torent\\peer\\peer_1001", "newFile");
+            fileLocation.createNewFile();
+            outputStream = new FileOutputStream(fileLocation);
+            
+            for (int i = 0; i < this.numberOfPieces; i++) {
+            	if (this.file[i] == null) {
+            		System.out.println("i " + i);
+            		System.out.println("piece corrupted");
+            		System.out.println("peer " + this.peerID);
+            	}
+            	else {
+            		outputStream.write(this.file[i]);
+            	}
+            	
+            }
+            
+        } catch (Exception e) {
+            System.out.println("FAILED TO SAVE FILE");
+            e.printStackTrace();
+        } 
+        finally {
+            if(outputStream != null) {
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch(Exception e) {
+                    System.out.println("FAILED TO SAVE FILED");
+                    e.printStackTrace();
+                }
+            }
+        }
 	}
 	
 	
