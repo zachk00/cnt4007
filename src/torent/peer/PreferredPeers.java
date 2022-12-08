@@ -91,7 +91,7 @@ public class PreferredPeers extends TimerTask {
 		} else {
 			// Compare download rates of all interested peers
 			// Sorted TreeMap of "speed" and corresponding peerIds
-			TreeMap<Integer, List<Integer>> peerDownloadSpeeds = new TreeMap<Integer, List<Integer>>();
+			TreeMap<Integer, List<Integer>> peerDownloadSpeeds = new TreeMap<Integer, List<Integer>>(Collections.reverseOrder());
 			
 			for (int peerId : interestedPeers) {
 				int piecesDownloaded = this.currPeer.getPeersInfo().get(peerId).getPiecesDownloaded();
