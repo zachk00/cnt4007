@@ -9,6 +9,8 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import torent.Common;
 import torent.client;
@@ -207,6 +209,10 @@ public class peer {
 		}
 	}
 	
+	public List<Integer> getInterestedPeers() {
+		return this.interestedPeers;
+	}
+
 	public boolean hasFile() {
 		return this.hasFile == 1;
 	}
@@ -347,6 +353,22 @@ public class peer {
 		return index;
 	}
 	
+	public List<Integer> getChokedPeers() {
+		return this.chockedPeers;
+	}
+
+	public List<Integer> getUnchokedPeers() {
+		return this.chockedPeers;
+	}
+
+	public int getPiecesDownloaded() {
+		return this.piecesDownloaded;
+	}
+
+	public void setPiecesDownloaded(int num) {
+		this.piecesDownloaded = num;
+	}
+
 	// feel free to change method signature as needed/ add helpers methods
 	//will call this from peerProcess for each peer to start the process
 	// it calls prefferd peers every X interval based on config
@@ -364,10 +386,12 @@ public class peer {
 	
 	// feel free to change method signature as needed/ add helpers methods
 	//will call this from peerProcess for each peer to start the process
-	// it calls poptimisticUnchoke every X interval based on config
+	// it calls optimisticUnchoke every X interval based on config
 	//probably need a thread
 	public void runOptimistic() {
-		// TODO
+		TimerTask opUnchoke = new optimisticUnchoke(this);
+		Timer opUnchoketimer = new Timer();
+		opUnchoketimer.scheduleAtFixedRate(opUnchoke, 0, this.getOptimisticUnchokingInterval()*1000);
 	}
 	
 	// feel free to change method signature as needed/ add helpers methods
@@ -410,7 +434,7 @@ public class peer {
 		byte[] fBytes = new byte[fileSize];
 		for (int i = 0; i < fileSize; i++)
 			fBytes[i] = file[(int) Math.floor((double) i / pieceSize)][i % pieceSize];
-		try (FileOutputStream byteToF = new FileOutputStream(filename + "\\" + peerID + "\\thefile")) {
+		try (FileOutputStream byteToF = new FileOutputStream(peerID + "\\" + filename)) {
 			byteToF.write(fBytes);
 			byteToF.close();
 		} catch (Exception e) {
