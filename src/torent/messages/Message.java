@@ -51,7 +51,8 @@ public class Message {
 		byte[] messageType = new byte[1];
 		messageType[0] = (byte) type;
 		
-		
+		int pieceIndex;
+		ByteBuffer temp;
 		
 		switch(type) {
 			case 0:
@@ -72,7 +73,13 @@ public class Message {
 				// have message(4) request message(6)
 				messageLength = messageType.length;
 				
-				payload = params.getPayload();
+				pieceIndex = params.getPieceIndex();
+				
+				temp = ByteBuffer.allocate(4);
+				temp.putInt(pieceIndex);
+				
+				payload = temp.array();
+				
 				
 				messageLength = messageLength + payload.length;
 				
@@ -82,6 +89,7 @@ public class Message {
 				message.write(length.array());
 				message.write(messageType);
 				message.write(payload);
+				
 				break;
 			case 5:
 				//bitfield message
@@ -101,10 +109,10 @@ public class Message {
 			case 7:
 				//piece message
 				messageLength = messageType.length;
-				ByteBuffer temp;
+				
 				
 				byte[] pieceField = params.getPieceField();
-				int pieceIndex = params.getPieceIndex();
+				pieceIndex = params.getPieceIndex();
 				
 				temp = ByteBuffer.allocate(4 + pieceField.length);
 				temp.putInt(pieceIndex);
