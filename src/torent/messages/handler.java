@@ -194,12 +194,12 @@ public class handler implements Runnable{
 							// if the requesting peer isnt choked send them their requested piece
 							piece = this.currPeer.getFile()[pieceIndex];
 							
-							messageParams params = new messageParams();
+							messageParams requestParams = new messageParams();
 							
-							params.setPieceField(piece);
-							params.setPieceIndex(pieceIndex);
+							requestParams.setPieceField(piece);
+							requestParams.setPieceIndex(pieceIndex);
 							
-							byte[] response = this.creator.createMessage(7, params);
+							byte[] response = this.creator.createMessage(7, requestParams);
 							
 							this.currPeer.transmit(out, response);
 							
@@ -231,10 +231,10 @@ public class handler implements Runnable{
 						this.currPeer.incrementPiecesDownload();
 						for (int id : this.currPeer.getContact().keySet()) {
 							if (id != this.currPeer.getPeerID()) {
-								messageParams params = new messageParams();
-								params.setPieceIndex(pieceIndex);
+								messageParams pieceReceivedInterested = new messageParams();
+								pieceReceivedInterested.setPieceIndex(pieceIndex);
 								
-								byte[] response = creator.createMessage(4, params);
+								byte[] response = creator.createMessage(4, pieceReceivedInterested);
 								
 								this.currPeer.transmit(this.currPeer.getContact().get(id), response);
 							}
@@ -252,10 +252,10 @@ public class handler implements Runnable{
 							BitSet interestingPieces = this.currPeer.findInterestingPieces(fromPieces);
 							int requestIndex  = this.currPeer.getRequestIndex(interestingPieces);
 							
-							messageParams params = new messageParams();
-							params.setPieceIndex(requestIndex);
+							messageParams pieceReceivedUninterested = new messageParams();
+							pieceReceivedUninterested.setPieceIndex(requestIndex);
 							
-							byte[] response = creator.createMessage(6, params);
+							byte[] response = creator.createMessage(6, pieceReceivedUninterested);
 							
 							this.currPeer.transmit(out, response);
 						}
@@ -292,13 +292,13 @@ public class handler implements Runnable{
 							// create proper param object 
 							// use message class to create byte array to send
 	
-							messageParams params = new messageParams();
+							messageParams handshakeParams = new messageParams();
 							
 							
 							
 							
-							params.setBitfield(this.currPeer.getBitfield());
-							byte[] response = creator.createMessage(5, params);
+							handshakeParams.setBitfield(this.currPeer.getBitfield());
+							byte[] response = creator.createMessage(5, handshakeParams);
 							System.out.println("sending bitfield msg after handshake " + this.currPeer.getPeerID() + " " + this.otherPeerID + " " + id);
 							this.currPeer.transmit(out, response);
 							
