@@ -84,9 +84,9 @@ public class peerProcess {
 		}
 		//** hardcoded test **//
 		
-		
+		peer newPeers = null;
 		try {
-			peer newPeers = null;
+			
 			peersInfo = readPeerConfig();
 			peersCommon = readCommonConfig();
 			//debugPeersInfo((HashMap<Integer, peer>) peersInfo);
@@ -112,7 +112,9 @@ public class peerProcess {
 			newPeers.initFile();
 			
 			if (newPeer.hasFile()) {
+				System.out.println("reading");
 				newPeer.readFile();	
+				newPeer.writeFile();
 			}
 			
 		} catch (IOException e) {
@@ -125,8 +127,10 @@ public class peerProcess {
 		
 		 client cl = new client(peersInfo.get(1002), peersInfo.get(1001));
 		 cl.connect();
-
-		// repeat previous steps for the client
+		 newPeers.runPreferredPeers();
+		// end hard code
+		
+		newPeer.runPreferredPeers();
 		
 		
 		
